@@ -1,0 +1,63 @@
+
+int n,m,l,r;
+string str;
+struct node
+{
+
+    int paired,enclosed,closed;
+    node(int pr=0,int en=0,int cl=0)
+    {
+        paired=pr;
+        enclosed=en;
+        closed=cl;
+    }
+
+};
+node tree[5123456];
+node combine(node leftChild,node rightChild)
+{
+
+    int nowPaired=min(leftChild.enclosed,rightChild.closed);
+    node ret = node(0,0,0);
+    ret.paired = leftChild.paired + rightChild.paired + nowPaired;
+    ret.enclosed = leftChild.enclosed + rightChild.enclosed - nowPaired;
+    ret.closed = leftChild.closed + rightChild.closed - nowPaired;
+
+    return ret;
+}
+node build(int start,int end, int root)
+{
+
+    if(start == end)
+    {
+        if(str[start]=='(')
+            tree[root]=node(0,1,0);
+        else
+            tree[root]=node(0,0,1);
+        return tree[root];
+    }
+    int mid=start + (end-start)/2;
+    int left=2*root+1;
+    int right=2*root+2;
+    node leftChild = build(start,mid,left);
+    node rightChild = build(mid+1,end,right);
+
+    return tree[root] = combine(leftChild, rightChild);
+}
+node query(int ss,int se ,int qs, int qe, int root)
+{
+
+    if(qs==ss&&qe==se)
+        return tree[root];
+    int mid=ss + (se-ss)/2;
+    int left=2*root+1;
+    int right=2*root+2;
+    if(qe<=mid)
+        return query(ss,mid,qs,qe,left);
+    if(qs>mid)
+        return query(mid+1,se,qs,qe,right);
+    node leftRet = query(ss,mid,qs,mid,left);
+    node rightRet = query(mid+1,se,mid+1,qe,right);
+
+    return combine(leftRet,rightRet);
+
